@@ -1,0 +1,142 @@
+'''
+# other commands
+# If I want to select specific payments to be separated into categories
+select * from BusinessAccount where Descriptions like '%EVENTBRITE INC.%';
+
+# If I want to sellect only positive values (income)
+select * from BusinessAccount where Value < 0;
+
+# If I want to sellect two values between two dates and for positive values (income)
+select * from BusinessAccount where Dates between '2020-11-01' and '2020-12-01' and Value > 0;
+
+# If I want to sum the values within a specifi selection - only positive values, between two dates
+select sum(Value) from BusinessAccount where Dates between '2020-11-30' and '2020-11-9' and Value > 0;
+
+# A way to categorise each transaction - if it has an eventbrite description, a positive value, 
+# and is in the month of Nov then it is a coaching based income. 
+select * from BusinessAccount where Dates between '2020-11-01' and '2020-12-01' and Value > 0 and Descriptions like '%EVENTBRITE%';
+
+# This will sume the value of all that are selected within a certain range
+select sum(Value) from BusinessAccount where Dates between '2020-11-01' and '2020-12-01' and Value > 0 and Descriptions like '%EVENTBRITE%';
+
+# able to do a total sum of all income between two dates
+select sum(Value) from BusinessAccount where Dates between '2022-09-30' and '2023-01-06' and Value > 0;
+
+# find all the payments that the company made to me, including loan payback
+select sum(Value) from BusinessAccount where Descriptions like '%TO A/C 49054287%';
+
+# find how much the company made in revenue since records began
+select sum(Value) from BusinessAccount where Value > 0;
+
+# find out how much the company spent this year
+select sum(Value) from BusinessAccount where Value < 0;
+'''
+
+select sum(Value) from BusinessAccount where Dates between '2022-09-30' and '2022-12-1' and Value > 0;
+
+
+comparing income and expense with one organisation
+select sum(value) as income from BusinessAccount where descriptions like '%YOUTH FIRST%' and value > 0;
+
+select sum(value) as expense from BusinessAccount where descriptions like '%YOUTH FIRST%' and value < 0;
+
+see all income and out going to youth first
+select * from BusinessAccount where descriptions like '%YOUTH FIRST%' and value > 0;
+
+
+sqlite3 -header -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/londonparkourproject.db "select distinct * from BusinessAccount where descriptions like '%YOUTH FIRST%';" > /Users/apple/Documents/corporate_organisation/systems_automation/program/csv/csv_marketing/in_vs_out_YF.csv
+
+bank_statement_2022
+sqlite3 -header -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/londonparkourproject.db "select Dates, Value, Descriptions from BusinessAccount where value < 0 and descriptions like '%49054287%' and Dates between '2021-04-06' and '2022-04-05';" > /Users/apple/desktop/bank_report_2022.csv
+
+
+bank_statement_2023
+sqlite3 -header -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/londonparkourproject.db "select Dates, Value, Descriptions from BusinessAccount where value < 0 and descriptions like '%49054287%' and Dates between '2022-04-06' and '2023-04-05';" > /Users/apple/desktop/bank_report_2023.csv
+
+
+Rent expense
+select sum(Value) as anual_hall_hire from BusinessAccount where value < 0 and descriptions like '%FOREST HILL SCHOOL%' or descriptions like '%SYDENHAM SCHOO%' and Dates between '2022-10-01' and '2023-04-02';
+
+select Dates, Value, Descriptions from BusinessAccount where value < 0 and descriptions like '%FOREST HILL SCHOOL%' or descriptions like '%SYDENHAM SCHOO%' and Dates between '2022-10-01' and '2023-04-02';
+
+
+# commands for output
+select sum(value) from BusinessAccount where dates between '2023-10-01' and '2024-03-18' and value > 0;
+
+
+sqlite> select sum(value) from BusinessAccount where dates between '2022-10-01' and '2023-09-30' and value > 0;
+sum(value)
+----------
+79542.8   
+sqlite> select sum(value) from BusinessAccount where dates between '2021-10-01' and '2022-09-30' and value > 0;
+sum(value)
+----------
+57063.42  
+sqlite> select sum(value) from BusinessAccount where dates between '2020-10-01' and '2021-09-30' and value > 0;
+sum(value)
+----------
+50540.19  
+sqlite> select sum(value) from BusinessAccount where dates between '2019-10-01' and '2020-09-30' and value > 0;
+sum(value)
+----------
+20110.68  
+sqlite> select sum(value) from BusinessAccount where dates between '2018-10-01' and '2019-09-30' and value > 0;
+sum(value)
+----------
+22777.57  
+sqlite> select sum(value) from BusinessAccount where dates between '2017-10-01' and '2018-09-30' and value > 0;
+19996.02
+----------
+sqlite> select sum(value) from BusinessAccount where dates between '2016-10-01' and '2017-09-30' and value > 0;
+sum(value)
+----------
+3862.5    
+sqlite> select sum(value) from BusinessAccount where dates between '2015-10-01' and '2016-09-30' and value > 0;
+sum(value)
+----------
+523.03    
+sqlite> select sum(value) from BusinessAccount where dates between '2014-10-01' and '2015-09-30' and value > 0;
+
+
+
+# commands not like
+select descriptions, value, dates from BusinessAccount 
+where dates between '2023-10-01' and '2023-12-31' 
+and value > 0 
+and descriptions not like '%refund%' 
+and descriptions not like '%EVENTBRITE%'
+and descriptions not like '%FP%'
+and descriptions not like '%SUMUP PAYMENTS ACC%'
+and descriptions not like '%HMRC COTAX%'
+and descriptions not like '%SMITH CSM%'
+and descriptions not like '%RUSHTON MRS DM%'
+and descriptions not like '%HOLLIS S I%'
+and descriptions not like '%THENEWSCHOOL%'
+and descriptions not like '%AHERN TK%'
+and descriptions not like '%PREWETT R & M%'
+and descriptions not like '%GANI HS&JE/CP%';
+
+#group by month and years
+SELECT
+  STRFTIME('%m-%Y', dates) AS advertisement_month,
+  COUNT(name) AS count
+FROM marketing
+GROUP BY
+  STRFTIME('%m-%Y', dates)
+ORDER BY
+  STRFTIME('%Y', dates);
+  
+advertisement_month  count     
+-------------------  ----------
+10-2022              91        
+12-2022              95        
+01-2023              64        
+02-2023              9         
+04-2023              106       
+05-2023              60        
+06-2023              51        
+07-2023              19        
+08-2023              4         
+09-2023              35        
+10-2023              13 
+

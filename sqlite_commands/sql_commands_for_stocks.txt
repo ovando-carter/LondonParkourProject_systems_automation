@@ -1,0 +1,41 @@
+'''
+# other commands
+Check only the Tesla stocks 
+select * from Stocks where Ticker = 'TSLA';
+
+Look at information in relation to GBP 
+select Date, Time_bought, No_shares, Price as Price_USD, round(Exchange_rate * Price,2) as Price_GBP, round(Total,2) as Total_GBP, round(No_shares * 842 * 0.84,2) as Current_value_GBP, round((No_shares * 842 * 0.84) - Total, 2) as Return from Stocks where Ticker = 'TSLA';
+
+**
+select Date, round(No_shares * Stock_Split,2) as shares_split_ajusted, Stock_Split,  round(Price / Stock_Split,2) as Price_USD, round((Exchange_rate * Price) / Stock_Split,2) as Price_GBP, round(Total,2) as Total_GBP, round(No_shares * Stock_Split * Current_Value,2) as Current_value_GBP, round((No_shares * Stock_Split * Current_Value) - Total, 2) as Return from Stocks where Ticker = 'TSLA' order by Date;
+
+sqlite3 -header -column -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/stocks_account2.db "select Date, Time_bought, round(No_shares * Stock_Split,2) as shares_split_ajusted, Stock_Split,  round(Price / Stock_Split,2) as Price_USD, round((Exchange_rate * Price) / Stock_Split,2) as Price_GBP, round(Total,2) as Total_GBP, round(No_shares * Stock_Split * Current_Value,2) as Current_value_GBP, round((No_shares * Stock_Split * Current_Value) - Total, 2) as Return from Stocks where Ticker = 'TSLA' order by Date;" > /Users/apple/Documents/corporate_organisation/systems_automation/program/csv/csv_personal/stocksData_TESLA.csv
+
+
+view total invested into each stock 
+select sum(No_shares), sum(Price) as Price_USD, round(Exchange_rate * Price,2) as Price_GBP, sum(round(Total,2)) as Total_GBP, Ticker from Stocks group by Ticker;
+
+split adjusted 5-1 stock split
+select Date, No_shares * Stock_Split as shares_split_ajusted, Stock_Split,  Price / Stock_Split as Price_USD, round((Exchange_rate * Price) / Stock_Split,2) as Price_GBP, round(Total,2) as Total_GBP, round(No_shares * Stock_Split * 842 * 0.84,2) as Current_value_GBP, round((No_shares * Stock_Split * 842 * 0.84) - Total, 2) as Return from Stocks where Ticker = 'TSLA' and Date between '2020-03-24' and '2020-08-03';
+
+
+add a new column that was not in the original csv file - here the csv file only recorded the stock value at the time of purchase, but did not alter it for the stock split.
+alter table stocks add Stock_Split;
+alter table stocks add Current_Value;
+
+update the entry for stock_split
+update stocks set Stock_Split = 15.0 where Ticker = 'TSLA' and Date between '2020-03-24' and '2020-08-03';
+
+update stocks set Stock_Split = 3.0 where Ticker = 'TSLA' and Date between '2020-09-01' and '2022-08-02';
+
+update stocks set Stock_Split = 1.0 where Ticker = 'TSLA' and Date between '2022-08-18' and '2023-06-29';
+
+update stocks set Current_Value = 259 *0.87 where Ticker = 'TSLA';
+'''
+
+sqlite3 -header -column -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/stocks_account2.db "select Date, Time_bought, No_shares , Price as Price_USD, round((Exchange_rate * Price),2) as Price_GBP, round(Total,2) as Total_GBP, round(No_shares * 289 * 0.84,2) as Current_value_GBP, round((No_shares * 289 * 0.84) - Total, 2) as Return from Stocks where Ticker = 'TSLA' and Date between '2020-03-24' and '2022-08-18';" > /Users/apple/Documents/corporate_organisation/systems_automation/program/csv/csv_personal/stocksData_TESLA.csv
+
+Check the value of the asset vs the value invested
+select sum(No_shares * stock_Split) as total_shares, sum(No_shares * stock_Split) * Current_Value  as total_asset_value, sum(Total) as total_invested from stocks where ticker = 'TSLA';
+
+select sum(No_shares * stock_Split) as total_shares, sum(No_shares * stock_Split) * Current_Value * (1/0.82) as total_asset_value_USD, sum(No_shares * stock_Split) * Current_Value  as total_asset_value_GBP, sum(Total) as total_invested_GBP, sum(round((No_shares * Stock_Split * Current_Value) - Total, 2)) as Return_GBP from stocks where ticker = 'TSLA';

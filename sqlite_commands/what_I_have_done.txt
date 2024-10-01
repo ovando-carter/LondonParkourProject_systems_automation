@@ -1,0 +1,81 @@
+[Microsoft][ODBC Driver 17 for SQL Server]TCP provider: Error code 0x2AF9
+
+https://docs.microsoft.com/en-us/answers/questions/552683/sqlcmd-error-microsoft-odbc-driver-17-for-sql-serv.html
+
+sqlite is a serverless database
+
+https://www.rkimball.com/how-to-connect-to-database-server-in-mac-excel/
+
+https://smallbusiness.chron.com/connecting-excel-sqlite-42473.html
+
+Tried to download a driver for ODBC
+http://ch-werner.de/sqliteodbc/
+
+someone doing it for microsoft os
+https://www.youtube.com/watch?v=r0EQkjcZtqM
+
+
+
+
+emailed
+YouTube@LearnDataAnalysis
+
+
+########################################################################################################################
+VBA code to connect sqlite to excel
+########################################################################################################################
+
+Option Explicit
+
+Sub ConnectToSQLite()
+    Dim conn As ADODB.Connection
+    dimrst ADODB.Recordset
+    Dim conn_string As String, database_path As String, sq_statement As String
+    Dim i As Long
+    
+    'how to connect tosqlite db
+    
+    database_path = "/Users/apple/Documents/systems_automation/program/database/Chinook_Sqlite.sqlite"
+    
+    conn_string = "driver=SQLite3 ODBC Driver;"
+    conn_string = conn_string & "Database" & database_path & ";"
+    
+    Set conn = NewADODB.Connection
+    With conn
+        .Open conn_string
+        .CursorLocation = adUserClient
+    End With
+    
+    Stop
+    
+    'how to pass sqlite statement toexcel
+    sql_statement = "select * from Customer where compant is not null"""
+    
+    Set rst = New ADODB.Recordset
+    With rst
+        .CursorLocation = adUserClient
+        .Open Source:=sql_statement, ActiveConnection:=conn
+    End With
+    
+    With ThisWorkbook.Worksheets("dataset")
+        '//clear all the data first
+        .Cells ClearContents
+        
+        '// insert record
+        .Range("A2").CopyFromRecordset rst
+        
+        '// insert column label
+        For i = 0 To rst.Fields.Count - 1
+            .Cells(1, i + 1) = rst.Fields(i).Name
+        Next i
+    End With
+    
+    rst.Close
+    conn.Close
+    
+    Set rst = Nothing
+    Set conn = Nothing
+    
+        
+
+End Sub

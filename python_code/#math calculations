@@ -1,0 +1,6 @@
+#math calculations 
+
+a = 2**2
+b = 2%2
+c = sqrt(2)
+a += 3 

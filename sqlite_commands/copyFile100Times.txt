@@ -1,0 +1,8 @@
+# loop the file from 1 - 100
+i=0
+while [ $i -ne 100 ]
+do
+        i=$(($i+1))
+        echo "4MyoData$i.csv"
+        cp 4MyoData.csv 4MyoData$i.csv
+done

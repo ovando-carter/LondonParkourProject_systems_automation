@@ -1,0 +1,53 @@
+# commandes for orders table in database
+search for specific order
+select Date , Event_ID , First_Name , Surname , Quantity as Qty , Ticket_Type , Attendee_no , Order_Type , Total_Paid , Fees_Paid , Eventbrite_Payment_Processing as processing , Attendee_Status from Orders where First_Name = 'sarah' and Surname = 'gregory' and Event_Name like '%BLOCK 1%';
+
+Check how much money has been paid to company via eventbrite
+select sum(Total_Paid) from Orders;
+
+find all the orders from sarah gregory case insentitive
+select Date , Event_ID , Event_Name, First_Name , Surname , Quantity as Qty , Ticket_Type , Attendee_no , Order_Type , Total_Paid , Fees_Paid , Eventbrite_Payment_Processing as processing , Attendee_Status from Orders where upper(First_Name) = upper('sarah') and upper(Surname) = upper('gregory');
+
+find out how much was paid by both parents
+select sum(Total_Paid) from Orders where upper(First_Name) = upper('joe') and upper(Surname) = upper('martin') or upper(First_Name) = upper('sarah') and upper(Surname) = upper('gregory') between '2020-10-30' and '2021-09-01';
+
+find out how much a parent has paid this year only
+select sum(Total_Paid) from Orders where upper(First_Name) = upper('elisa') and Date between '2020-10-30' and '2019-09-01';
+
+only show the client names once 
+select distinct First_Name, Surname from Orders;
+
+select distinct First_Name, Surname, Billing_Address_1, Billing_Postcode from Orders;
+
+group total paid by first name
+select First_Name, Surname, sum(Total_Paid) from Orders group by First_Name;
+
+or if i wanted to compare total_paid with the geographical location
+select First_Name, Surname, sum(Total_Paid), Billing_Postcode from Orders group by First_Name; 
+
+group total paid by first name - but clients have put a space infront of their name (so the query sees them as different names)
+select distinct rtrim(upper(First_Name)), rtrim(upper(Surname)), sum(Total_Paid) from Orders group by rtrim(upper(First_Name)), rtrim(upper(Surname)) order by upper(Surname), upper(First_Name);
+
+group  clients by the date that they first joined
+select distinct rtrim(upper(First_Name)), rtrim(upper(Surname)), Ticket_Type, date  from Orders group by rtrim(upper(First_Name)), rtrim(upper(Surname)) order by date ASC;
+
+
+checking by an individual student
+select First_Name, Surname, sum(Total_Paid) from Orders where upper(First_Name) = upper('ben') and upper(Surname) = upper('allison') group by Surname;
+
+looking for all the clients in a particular class
+select distinct First_Name, Surname from Orders where Event_Name like '%SEND%';
+
+Can output the sql query table to csv 
+sqlite3 -header -csv /Users/apple/Documents/systems_automation/program/database/orders_account.db "select distinct rtrim(upper(First_Name)) as First_Name, rtrim(upper(Surname)) as Surname, sum(Total_Paid) as Total_Paid, Email, Billing_Postcode from Orders group by rtrim(upper(First_Name)), rtrim(upper(Surname)) order by upper(Surname), upper(First_Name);" > /Users/apple/Documents/systems_automation/program/csv/clientData.csv
+
+sorting the income acording to class type
+select sum(Total_paid), Event_Name, Date from Orders where Date between '2021-10-01' and '2022-09-30' group by Event_Name order by Date;
+
+Check the number of orders per date
+select distinct count(Date), Date from Orders group by Date order by Date;
+
+tasters only per date
+select distinct Date, count(Date) from Orders where Event_Name like '%TRIAL%' or Event_Name like '%TASTER%' group by Date order by Date;
+
+sqlite3 -header -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/londonparkourproject.db "select distinct count(Date), Date from Orders group by Date order by Date;" > /Users/apple/Documents/corporate_organisation/systems_automation/program/csv/csv_marketing/ordersPerDate.csv

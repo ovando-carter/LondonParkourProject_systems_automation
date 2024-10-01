@@ -1,0 +1,1 @@
+sqlite3 -header -column -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/uniContacts.db "select * from uniContacts ;" > /Users/apple/Documents/corporate_organisation/systems_automation/program/csv/csv_marketing/university_audience.csv

@@ -1,0 +1,28 @@
+
+#this will show if there are any duplicates
+select FirstName, LastName, phone_number1, phone_number2, count(*) as count from iphoneContacts group by phone_number1, phone_number2 having count (*) > 1 order by phone_number1, phone_number2;
+
+
+# create a new table but only with the group by numbers
+create table iphoneContacts2 as select FirstName, LastName, phone_number1, phone_number2 from iphoneContacts group by phone_number1, phone_number2;
+
+#check again to show if there are any duplicates, there should be none
+select FirstName, LastName, phone_number1, phone_number2, count(*) as count from iphoneContacts group by phone_number1, phone_number2 having count (*) > 1 order by phone_number1, phone_number2;
+
+# check the count
+select count(*) from iphoneContacts2;
+
+# compare the count to original table
+select count(*) from iphoneContacts;
+
+#check tables
+.table
+
+#delete a table 
+drop table iphoneContacts;
+
+# remove non uk numbers - starting with +44 or 07 
+select * from iphoneContacts2 group by phone_number1, phone_number2 having phone_number1 like '+44%' or phone_number1 like '07%' or phone_number2 like '+44%' or phone_number2 like '07%';
+
+# output the data to a csv file
+sqlite3 -header -csv /Users/apple/Documents/corporate_organisation/systems_automation/program/database/iphoneContacts.db "select * from iphoneContacts2 group by phone_number1, phone_number2 having phone_number1 like '+44%' or phone_number1 like '07%' or phone_number2 like '+44%' or phone_number2 like '07%';" > /Users/apple/Documents/corporate_organisation/systems_automation/program/csv/csv_marketing/iphoneCont_groupby.csv
