@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GDP Voronoi Diagram with Regional Colors</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <svg width="600" height="600" id="gdp-voronoi"></svg>
+    <script>
+        const width = 600;
+        const height = 600;
+        const radius = 300; // Radius of the circular boundary
+        const center = [width / 2, height / 2];
+        const svg = d3.select("#gdp-voronoi");
+
+        // Define region colors
+        const regionColors = {
+            "Asia": "#FF6666",
+            "Europe": "#66B2FF",
+            "North America": "#99FF99",
+            "South America": "#FFCC66",
+            "Africa": "#FFD700",
+            "Australia": "#FF99FF",
+            "Rest of the World": "#CCCCCC"
+        };
+
+        // GDP data
+        const gdpData = [
+            { name: "China", gdp: 14.84, region: "Asia" },
+            { name: "Japan", gdp: 5.91, region: "Asia" },
+            { name: "India", gdp: 2.83, region: "Asia" },
+            { name: "South Korea", gdp: 1.86, region: "Asia" },
+            { name: "Russia", gdp: 1.8, region: "Asia" },
+            { name: "Indonesia", gdp: 1.16, region: "Asia" },
+            { name: "Turkey", gdp: 0.97, region: "Asia" },
+            { name: "Saudi Arabia", gdp: 0.87, region: "Asia" },
+            { name: "Iran", gdp: 0.57, region: "Asia" },
+            { name: "Thailand", gdp: 0.53, region: "Asia" },
+            { name: "United Arab Emirates", gdp: 0.5, region: "Asia" },
+            { name: "Hong Kong", gdp: 0.42, region: "Asia" },
+            { name: "Israel", gdp: 0.4, region: "Asia" },
+            { name: "Malaysia", gdp: 0.4, region: "Asia" },
+            { name: "Singapore", gdp: 0.39, region: "Asia" },
+            { name: "Philippines", gdp: 0.39, region: "Asia" },
+            { name: "United States", gdp: 24.32, region: "North America" },
+            { name: "Canada", gdp: 2.09, region: "North America" },
+            { name: "Mexico", gdp: 1.54, region: "North America" },
+            { name: "Germany", gdp: 4.54, region: "Europe" },
+            { name: "United Kingdom", gdp: 3.85, region: "Europe" },
+            { name: "France", gdp: 3.26, region: "Europe" },
+            { name: "Italy", gdp: 2.46, region: "Europe" },
+            { name: "Spain", gdp: 1.62, region: "Europe" },
+            { name: "Netherlands", gdp: 1.01, region: "Europe" },
+            { name: "Switzerland", gdp: 0.9, region: "Europe" },
+            { name: "Sweden", gdp: 0.67, region: "Europe" },
+            { name: "Poland", gdp: 0.64, region: "Europe" },
+            { name: "Belgium", gdp: 0.61, region: "Europe" },
+            { name: "Norway", gdp: 0.52, region: "Europe" },
+            { name: "Austria", gdp: 0.51, region: "Europe" },
+            { name: "Denmark", gdp: 0.4, region: "Europe" },
+            { name: "Ireland", gdp: 0.38, region: "Europe" },
+            { name: "Brazil", gdp: 2.39, region: "South America" },
+            { name: "Argentina", gdp: 0.79, region: "South America" },
+            { name: "Venezuela", gdp: 0.5, region: "South America" },
+            { name: "Colombia", gdp: 0.39, region: "South America" },
+            { name: "Australia", gdp: 1.81, region: "Australia" },
+            { name: "Nigeria", gdp: 0.65, region: "Africa" },
+            { name: "Egypt", gdp: 0.45, region: "Africa" },
+            { name: "South Africa", gdp: 0.42, region: "Africa" },
+            { name: "Rest of the World", gdp: 9.41, region: "Rest of the World" }
+        ];
+
+        // Scale to control Voronoi cell size by GDP
+        const sizeScale = d3.scaleSqrt()
+            .domain([0, d3.max(gdpData, d => d.gdp)])
+            .range([10, radius / 2]);
+
+        // Generate points for each region, adjusting based on GDP
+        const points = [];
+        const regionCenters = {
+            "Asia": [center[0] - radius / 2, center[1] - radius / 2],
+            "Europe": [center[0] + radius / 2, center[1] - radius / 2],
+            "North America": [center[0] - radius / 2, center[1] + radius / 2],
+            "South America": [center[0] + radius / 2, center[1] + radius / 2],
+            "Africa": [center[0], center[1] + radius / 3],
+            "Australia": [center[0], center[1] - radius / 3],
+            "Rest of the World": [center[0], center[1]]
+        };
+
+        gdpData.forEach(country => {
+            const regionCenter = regionCenters[country.region];
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = Math.random() * sizeScale(country.gdp);
+            points.push({
+                coordinates: [
+                    regionCenter[0] + distance * Math.cos(angle),
+                    regionCenter[1] + distance * Math.sin(angle)
+                ],
+                gdp: country.gdp,
+                region: country.region,
+                name: country.name
+            });
+        });
+
+        // Create the Delaunay structure and compute the Voronoi diagram
+        const delaunay = d3.Delaunay.from(points.map(d => d.coordinates));
+        const voronoi = delaunay.voronoi([0, 0, width, height]);
+
+        // Define a circular clip path to use on the Voronoi cells
+        svg.append("defs").append("clipPath")
+            .attr("id", "circle-clip")
+            .append("circle")
+            .attr("cx", center[0])
+            .attr("cy", center[1])
+            .attr("r", radius);
+
+        // Draw each Voronoi cell with region-specific color, clipped to the circle
+        svg.selectAll("path")
+            .data(points)
+            .enter().append("path")
+            .attr("d", (_, i) => voronoi.renderCell(i))
+            .attr("fill", d => regionColors[d.region]) // Use region color
+            .attr("stroke", "white") // White borders
+            .attr("stroke-width", 1.5)
+            .attr("clip-path", "url(#circle-clip)");
+
+        // Draw the circular boundary with white stroke
+        svg.append("circle")
+            .attr("cx", center[0])
+            .attr("cy", center[1])
+            .attr("r", radius)
+            .attr("fill", "none")
+            .attr("stroke", "white")
+            .attr("stroke-width", 2);
+
+        // Add country name and GDP as separate text elements
+        svg.selectAll("text.country-name")
+            .data(points)
+            .enter().append("text")
+            .attr("class", "country-name")
+            .attr("x", (_, i) => {
+                const cell = voronoi.cellPolygon(i);
+                const [cx, cy] = d3.polygonCentroid(cell);
+                return cx;
+            })
+            .attr("y", (_, i) => {
+                const cell = voronoi.cellPolygon(i);
+                const [cx, cy] = d3.polygonCentroid(cell);
+                return cy - 5; // Slightly above the GDP value
+            })
+            .attr("font-size", "10px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "white")
+            .text(d => d.name);
+
+        svg.selectAll("text.country-gdp")
+            .data(points)
+            .enter().append("text")
+            .attr("class", "country-gdp")
+            .attr("x", (_, i) => {
+                const cell = voronoi.cellPolygon(i);
+                const [cx, cy] = d3.polygonCentroid(cell);
+                return cx;
+            })
+            .attr("y", (_, i) => {
+                const cell = voronoi.cellPolygon(i);
+                const [cx, cy] = d3.polygonCentroid(cell);
+                return cy + 10; // Slightly below the country name
+            })
+            .attr("font-size", "8px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "white")
+            .text(d => `GDP: ${d.gdp}`);
+    </script>
+</body>
+</html>
